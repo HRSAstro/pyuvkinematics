@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pyuvkin"
+name = "pyuvkinematics"
 version = "0.1.0"
 description = "Kinematic modelling of interferometric spectral-line data by forward modelling in the uv-plane"
 readme = "README.md"
@@ -32,7 +32,7 @@ ms = ["python-casacore"]
 all = ["kinms>=3.0.14", "galpak==1.34.0"]
 
 [project.scripts]
-pyuvkin = "pyuvkin.cli:main"
+pyuvkinematics = "pyuvkinematics.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

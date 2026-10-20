@@ -4,12 +4,12 @@ model in exactly one respect at a time."""
 import numpy as np
 import pytest
 
-from pyuvkin import conventions
-from pyuvkin.mock_structured import (
+from pyuvkinematics import conventions
+from pyuvkinematics.mock_structured import (
     DEFAULT_TRUTH, MOCKS, SpiralStructure, line_of_sight_velocity, render_structured_cube,
     sersic_b, sersic_profile, spiral_arm_profile, structured_surface_brightness,
 )
-from pyuvkin.models import AnalyticSB, DiscParameters, make_renderer
+from pyuvkinematics.models import AnalyticSB, DiscParameters, make_renderer
 
 from conftest import cube_moments
 
@@ -92,7 +92,7 @@ def test_no_arm_flow_reproduces_the_thindisk_velocity_field(disc_params, geometr
     arm = spiral_arm_profile(radius, np.arctan2(sin_t, cos_t), MOCKS["arms_sb"])
     v = line_of_sight_velocity(radius, cos_t, sin_t, arm, disc_params, MOCKS["arms_sb"])
 
-    from pyuvkin.models.parameters import rotation_curve_kms
+    from pyuvkinematics.models.parameters import rotation_curve_kms
 
     expected = disc_params.v_sys + rotation_curve_kms(radius, disc_params, "arctan") * cos_t * (
         np.sin(np.radians(disc_params.inclination))
@@ -104,7 +104,7 @@ def test_axisymmetric_inflow_matches_thindisk_vrad_and_redshifts_near_side(
         disc_params, geometry,
 ):
     """``arms_inflow`` uses constant axisymmetric ``vrad``, same as thindisk."""
-    from pyuvkin.mock_structured import INFLOW_VRAD_KMS
+    from pyuvkinematics.mock_structured import INFLOW_VRAD_KMS
 
     yy, xx = geometry.coordinates(1)
     radius, cos_t, sin_t = conventions.disc_coordinates(
@@ -128,7 +128,7 @@ def test_axisymmetric_inflow_matches_thindisk_vrad_and_redshifts_near_side(
 
 
 def test_inflow_mock_truth_and_fit_free_axisymmetric_vrad():
-    from pyuvkin.mock_structured import INFLOW_VRAD_KMS, DEFAULT_TRUTH, fit_settings
+    from pyuvkinematics.mock_structured import INFLOW_VRAD_KMS, DEFAULT_TRUTH, fit_settings
 
     truth = {
         **DEFAULT_TRUTH,
@@ -144,7 +144,7 @@ def test_inflow_mock_truth_and_fit_free_axisymmetric_vrad():
 
 def test_the_two_mocks_share_a_morphology_but_not_a_velocity_field(disc_params, geometry,
                                                                    spectral):
-    from pyuvkin.mock_structured import MOCK_KINEMATICS
+    from pyuvkinematics.mock_structured import MOCK_KINEMATICS
 
     cubes, maps = {}, {}
     for name, s in MOCKS.items():
@@ -210,7 +210,7 @@ def test_an_exponential_disc_cannot_reproduce_the_structured_map(disc_params, ge
 
 def test_from_fits_orientation_flips_spatial_y_not_channels():
     """Regression: np.flipud on a cube flips channels and leaves Dec mirrored."""
-    from pyuvkin.mock_structured import _from_fits_orientation
+    from pyuvkinematics.mock_structured import _from_fits_orientation
 
     cube = np.arange(2 * 3 * 4, dtype=float).reshape(2, 3, 4)
     out = _from_fits_orientation(cube)
@@ -223,8 +223,8 @@ def test_from_fits_orientation_flips_spatial_y_not_channels():
 def test_write_structured_mocks_round_trips(tmp_path):
     import json
 
-    from pyuvkin.mock_structured import write_structured_mocks
-    from pyuvkin.uvdata import UVData
+    from pyuvkinematics.mock_structured import write_structured_mocks
+    from pyuvkinematics.uvdata import UVData
 
     written = write_structured_mocks(tmp_path, n_vis=200, n_chan=8, fov=2.0)
     assert written.pop("overview").exists()
@@ -248,7 +248,7 @@ def test_write_structured_mocks_round_trips(tmp_path):
             # only the inflow mock frees axisymmetric vrad
             assert ("vrad" in settings["priors"]) == (name == "arms_inflow")
             if name == "arms_inflow":
-                from pyuvkin.mock_structured import INFLOW_VRAD_KMS
+                from pyuvkinematics.mock_structured import INFLOW_VRAD_KMS
                 assert truth["vrad"] == INFLOW_VRAD_KMS
                 assert settings["truth"]["vrad"] == INFLOW_VRAD_KMS
             else:

@@ -1,6 +1,6 @@
 # Spiral-arm structured mocks
 
-Internal notes for the `pyuvkin mock-spiral` experiment: morphology vs
+Internal notes for the `pyuvkinematics mock-spiral` experiment: morphology vs
 kinematics, freeform surface brightness, and constant axisymmetric `vrad`.
 Numbers below are for the specific mocks under `out/spiral_mocks/` and will
 change if you retune noise, FOV, or priors.
@@ -28,14 +28,14 @@ Truth parameters (both mocks unless noted): \(i = 55^\circ\), \(\phi = 40^\circ\
 
 ```bash
 # write datasets + settings (+ overview figure)
-pyuvkin mock-spiral out/spiral_mocks
+pyuvkinematics mock-spiral out/spiral_mocks
 
 # L-BFGS analytic + freeform (+ Matérn freeform); then comparison plots
-pyuvkin mock-spiral out/spiral_mocks --fit
-pyuvkin mock-spiral out/spiral_mocks --plot   # rebuild plots only
+pyuvkinematics mock-spiral out/spiral_mocks --fit
+pyuvkinematics mock-spiral out/spiral_mocks --plot   # rebuild plots only
 
 # Nautilus (separate settings; does not overwrite L-BFGS outs)
-pyuvkin fit out/spiral_mocks/arms_inflow/settings_freeform_nautilus.json
+pyuvkinematics fit out/spiral_mocks/arms_inflow/settings_freeform_nautilus.json
 # … likewise settings_analytic_nautilus.json, arms_sb/…
 ```
 
@@ -91,7 +91,7 @@ the usual high-inclination / wrong-φ compromise.
 Rebuild the comparison plots from Nautilus products (median ± 1σ):
 
 ```python
-from pyuvkin.mock_structured import compare_structured_fits
+from pyuvkinematics.mock_structured import compare_structured_fits
 compare_structured_fits("out/spiral_mocks", fit_suffix="_nautilus")
 ```
 

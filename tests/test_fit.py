@@ -7,8 +7,8 @@ import pytest
 
 import autofit as af
 
-from pyuvkin import config, mock, priors
-from pyuvkin.models import DiscParameters, PARAMETER_NAMES
+from pyuvkinematics import config, mock, priors
+from pyuvkinematics.models import DiscParameters, PARAMETER_NAMES
 
 
 def test_settings_defaults_merge_and_refuse_unknown_keys(tmp_path):
@@ -47,10 +47,10 @@ def test_priors_build_model_fixed_and_free():
 
 
 def test_rings_mode_broadcast_priors_and_free_geometry():
-    from pyuvkin.models.parameters import (
+    from pyuvkinematics.models.parameters import (
         make_tilted_ring_class, parse_free_ring_params, ring_parameter_names,
     )
-    from pyuvkin.search import tilted_ring_optimiser_defaults
+    from pyuvkinematics.search import tilted_ring_optimiser_defaults
 
     free = parse_free_ring_params("VROT VDISP INC PA")
     assert free == ("vrot", "velocity_dispersion", "inclination", "phi")
@@ -86,7 +86,7 @@ def test_rings_mode_broadcast_priors_and_free_geometry():
 
 
 def test_ring_regularize_median_poly_bezier_and_auto():
-    from pyuvkin import ring_regularize as rr
+    from pyuvkinematics import ring_regularize as rr
 
     radii = np.array([0.5, 1.0, 1.5, 2.0, 2.5])
     noisy = np.array([40.0, 42.0, 80.0, 44.0, 46.0])  # spike at ring 2
@@ -110,8 +110,8 @@ def test_ring_regularize_median_poly_bezier_and_auto():
 
 
 def test_rmax_sets_outer_galmod_radius():
-    from pyuvkin.models.bbarolo import _resolve_r_max, galmod_ring_radii
-    from pyuvkin.models.parameters import DiscParameters
+    from pyuvkinematics.models.bbarolo import _resolve_r_max, galmod_ring_radii
+    from pyuvkinematics.models.parameters import DiscParameters
 
     # explicit rmax is the outer radius (not inflated to a larger lit map)
     assert _resolve_r_max(
@@ -131,7 +131,7 @@ def test_rmax_sets_outer_galmod_radius():
 
 
 def test_ring_errors_1sigma_helper():
-    from pyuvkin.results import _ring_errors_1sigma
+    from pyuvkinematics.results import _ring_errors_1sigma
 
     err = {"vrot_0": [10.0, 12.0], "vrot_1": [5.0, 7.0], "vrot_2": [8.0, 9.0]}
     lo, hi = _ring_errors_1sigma(err, "vrot", 3)
@@ -141,7 +141,7 @@ def test_ring_errors_1sigma_helper():
 
 
 def test_asymmetric_drift_iorio_formula():
-    from pyuvkin import asymmetric_drift as ad
+    from pyuvkinematics import asymmetric_drift as ad
 
     # flat Σ and σ → ADC = 0 → V_circ = V_rot
     r = np.array([1.0, 2.0, 3.0, 4.0])
@@ -160,8 +160,8 @@ def test_asymmetric_drift_iorio_formula():
 
 
 def test_vrad_freeable_and_linear_option():
-    from pyuvkin.models.parameters import parse_free_ring_params, ring_parameter_names
-    from pyuvkin.models.bbarolo import resolve_linear_channels, apply_instrumental_broadening
+    from pyuvkinematics.models.parameters import parse_free_ring_params, ring_parameter_names
+    from pyuvkinematics.models.bbarolo import resolve_linear_channels, apply_instrumental_broadening
 
     free = parse_free_ring_params("VROT VDISP VRAD INC PA")
     assert free == ("vrot", "velocity_dispersion", "vrad", "inclination", "phi")
@@ -195,13 +195,13 @@ def _tight_settings(ds, truth, out, method):
 
 @pytest.mark.slow
 def test_end_to_end_lbfgs_recovers_truth(tmp_path):
-    import pyuvkin
+    import pyuvkinematics
 
     ds, tp = mock.write_mock_dataset(tmp_path / "mock", None, n_vis=250, n_chan=8, sigma_jy=4e-4)
     truth = json.loads(tp.read_text())
     s = _tight_settings(ds, truth, tmp_path / "fit", "lbfgs")
     s["search"]["start"] = "centre"
-    r = pyuvkin.run(s)
+    r = pyuvkinematics.run(s)
     rec = r.best_fit_record
     assert rec["kind"] == "optimisation"
     assert rec["fit_quality"]["chi_squared_reduced"] < 1.1
@@ -229,14 +229,14 @@ def test_end_to_end_lbfgs_recovers_truth(tmp_path):
 
 @pytest.mark.slow
 def test_end_to_end_sampler_writes_posterior(tmp_path):
-    import pyuvkin
+    import pyuvkinematics
 
     ds, tp = mock.write_mock_dataset(tmp_path / "mock", None, n_vis=150, n_chan=6, sigma_jy=6e-4)
     truth = json.loads(tp.read_text())
     s = _tight_settings(ds, truth, tmp_path / "fit", "emcee")
     s["search"] = {"method": "emcee", "nwalkers": 12, "nsteps": 60}
     s["write_cubes"] = False
-    r = pyuvkin.run(s)
+    r = pyuvkinematics.run(s)
     rec = r.best_fit_record
     assert rec["kind"] == "bayesian_sampling"
     assert set(rec["median_pdf"]) == {"v_sys", "phi", "maximum_velocity"}
@@ -247,9 +247,9 @@ def test_end_to_end_sampler_writes_posterior(tmp_path):
 
 
 def test_relative_paths_resolve_against_the_settings_file(tmp_path, monkeypatch):
-    """`pyuvkin fit dir/settings.json` run from elsewhere must find the dataset
+    """`pyuvkinematics fit dir/settings.json` run from elsewhere must find the dataset
     and put `out` next to the settings file, not in the current directory."""
-    from pyuvkin import cli
+    from pyuvkinematics import cli
 
     ds, tp = mock.write_mock_dataset(tmp_path / "mock", None, n_vis=80, n_chan=6, sigma_jy=1e-3)
     truth = json.loads(tp.read_text())
@@ -272,7 +272,7 @@ def test_relative_paths_resolve_against_the_settings_file(tmp_path, monkeypatch)
 def test_velocity_window_and_v_sys_share_one_zero_point():
     """Without a rest or reference frequency v = 0 is the mean of the *full*
     band, before the window is cut; the window's own mean must not move it."""
-    from pyuvkin import api
+    from pyuvkinematics import api
 
     uvd, _ = mock.simulate_disc(n_vis=30, n_chan=16, dv_kms=30.0)
     full_mean = float(np.mean(uvd.frequencies))
@@ -288,8 +288,8 @@ def test_fits_map_orientation_and_centre_checks(tmp_path):
 
     from pyuvimage.products import build_header, to_fits_orientation
 
-    from pyuvkin import freeform
-    from pyuvkin.spectral import spectral_axis
+    from pyuvkinematics import freeform
+    from pyuvkinematics.spectral import spectral_axis
 
     n, ps = 20, 0.1
     native = np.zeros((n, n))
@@ -329,7 +329,7 @@ def test_fits_map_orientation_and_centre_checks(tmp_path):
 def test_freeform_morphology_scatter_is_reported(tmp_path):
     """The freeform map comes from the same data; morphology_samples re-fits
     perturbed maps and adds their scatter to the record."""
-    import pyuvkin
+    import pyuvkinematics
 
     ds, tp = mock.write_mock_dataset(tmp_path / "mock", None, n_vis=120, n_chan=6, sigma_jy=6e-4)
     truth = json.loads(tp.read_text())
@@ -340,7 +340,7 @@ def test_freeform_morphology_scatter_is_reported(tmp_path):
     s["priors"].pop("scale_radius", None)
     s["write_plots"] = False
     s["write_cubes"] = False
-    r = pyuvkin.run(s)
+    r = pyuvkinematics.run(s)
     m = r.best_fit_record["morphology"]
     assert m["n_samples"] == 2 and set(m["scatter_1sigma"]) == {"v_sys", "phi", "maximum_velocity"}
     assert all(len(v) == 2 for v in m["samples"].values())

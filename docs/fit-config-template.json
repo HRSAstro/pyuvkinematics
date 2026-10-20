@@ -1,6 +1,6 @@
 {
   "dataset": null,
-  "out": "pyuvkin_out",
+  "out": "pyuvkinematics_out",
   "spw": null,
   "channels": null,
   "velocity_window_kms": null,

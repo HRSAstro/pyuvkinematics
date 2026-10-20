@@ -3,8 +3,8 @@
 import numpy as np
 import pytest
 
-from pyuvkin import conventions
-from pyuvkin.models import AnalyticSB, FreeformSB, DiscParameters, make_renderer
+from pyuvkinematics import conventions
+from pyuvkinematics.models import AnalyticSB, FreeformSB, DiscParameters, make_renderer
 
 from conftest import cube_moments, measure_kinematics, needs
 
@@ -69,7 +69,7 @@ def test_freeform_matches_analytic_morphology(backend, geometry, spectral, disc)
 def test_bbarolo_local_surface_brightness_renorm():
     """BBarolo freeform is NORM=LOCAL against the map: spectra keep their
     shape, integrated flux becomes the target."""
-    from pyuvkin.models.bbarolo import apply_local_surface_brightness
+    from pyuvkinematics.models.bbarolo import apply_local_surface_brightness
 
     rng = np.random.RandomState(0)
     # fake GalMod cube: arbitrary spectra, non-zero on a patch
@@ -105,7 +105,7 @@ KINEMATIC_CASES = [
     pytest.param("galpak", {"aspect": 0.05}, marks=needs("galpak")),
 ])
 def test_backends_agree_on_inclination_rotation_curve_and_dispersion(backend, options, case, spectral):
-    from pyuvkin.grids import CubeGeometry
+    from pyuvkinematics.grids import CubeGeometry
 
     # a field that holds the whole disc: a truncated exponential reads a
     # lower inclination from its moments, and the backends truncate differently
@@ -133,7 +133,7 @@ def test_galpak_default_is_thick(spectral):
     `velocity_dispersion` is only the constant part of the line width, so the
     measured dispersion exceeds the parameter -- documented, and pinned here
     so a change in GalPaK's behaviour is noticed."""
-    from pyuvkin.grids import CubeGeometry
+    from pyuvkinematics.grids import CubeGeometry
 
     n, ps = 64, 0.08
     geometry = CubeGeometry(fov_arcsec=n * ps, pixel_scale=ps, shape=(n, n), nyquist_pixel_scale=ps)
@@ -156,8 +156,8 @@ def test_galpak_default_is_thick(spectral):
 def test_half_pixel_and_half_channel_offsets_for_odd_and_even_sizes(backend, n, n_chan):
     """KinMS's phaseCent and vOffset corrections were measured on even grids;
     they must hold for odd pixel counts and odd channel counts too."""
-    from pyuvkin.grids import CubeGeometry
-    from pyuvkin.spectral import spectral_axis
+    from pyuvkinematics.grids import CubeGeometry
+    from pyuvkinematics.spectral import spectral_axis
 
     ps, dv = 0.05, 20.0
     geometry = CubeGeometry(fov_arcsec=n * ps, pixel_scale=ps, shape=(n, n), nyquist_pixel_scale=ps)

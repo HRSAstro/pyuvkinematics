@@ -3,8 +3,8 @@
 import numpy as np
 import pytest
 
-from pyuvkin.models import AnalyticSB, DiscParameters, make_renderer
-from pyuvkin.models.parameters import (
+from pyuvkinematics.models import AnalyticSB, DiscParameters, make_renderer
+from pyuvkinematics.models.parameters import (
     dispersion_curve_kms,
     normalize_dispersion_curve,
     normalize_rotation_curve,
@@ -83,7 +83,7 @@ def test_thindisk_renders_rix_exponential(geometry, spectral, disc):
 
 
 def test_config_accepts_rix_and_exponential_dispersion():
-    from pyuvkin.config import DEFAULTS, validate_settings
+    from pyuvkinematics.config import DEFAULTS, validate_settings
     import copy
 
     s = copy.deepcopy(DEFAULTS)

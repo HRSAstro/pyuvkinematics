@@ -5,9 +5,9 @@ import pytest
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
-from pyuvkin.grids import CubeGeometry  # noqa: E402
-from pyuvkin.spectral import spectral_axis  # noqa: E402
-from pyuvkin.models import DiscParameters, backend_available  # noqa: E402
+from pyuvkinematics.grids import CubeGeometry  # noqa: E402
+from pyuvkinematics.spectral import spectral_axis  # noqa: E402
+from pyuvkinematics.models import DiscParameters, backend_available  # noqa: E402
 
 
 @pytest.fixture
@@ -61,7 +61,7 @@ def measure_kinematics(cube, spectral, geometry, p):
     width along the minor axis (away from the centre), all from the cube."""
     from scipy.optimize import curve_fit
 
-    from pyuvkin.results import pv_slice
+    from pyuvkinematics.results import pv_slice
 
     v = spectral.velocities_kms
     dv = spectral.dv_kms

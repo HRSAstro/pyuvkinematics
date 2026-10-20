@@ -1,6 +1,6 @@
 """Memory snapshot helpers."""
 
-from pyuvkin import memory
+from pyuvkinematics import memory
 
 
 def test_format_bytes():

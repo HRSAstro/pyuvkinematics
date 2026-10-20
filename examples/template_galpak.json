@@ -2,7 +2,7 @@
   "_notes": [
     "GalPaK3D backend template (analytic surface brightness only — no freeform).",
     "Install: pip install galpak==1.34.0. JSON does not allow // comments — use _keys for notes.",
-    "Copy this file, set dataset/out/spectral/priors, then: pyuvkin fit template_galpak.json"
+    "Copy this file, set dataset/out/spectral/priors, then: pyuvkinematics fit template_galpak.json"
   ],
 
   "dataset": "path/to/visibilities.npz",

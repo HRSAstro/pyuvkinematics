@@ -3,7 +3,7 @@
     "BBarolo (pyBBarolo GalMod) backend template.",
     "Supports freeform surface brightness and free tilted rings (rotation_curve: rings).",
     "Install: see docs/install-bbarolo.md. JSON does not allow // comments — use _keys for notes.",
-    "Copy this file, set dataset/out/spectral/priors, then: pyuvkin fit template_bbarolo.json"
+    "Copy this file, set dataset/out/spectral/priors, then: pyuvkinematics fit template_bbarolo.json"
   ],
 
   "dataset": "path/to/visibilities.npz",

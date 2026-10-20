@@ -1,12 +1,12 @@
 # Installing pyBBarolo for the `bbarolo` backend
 
-pyuvkin's `bbarolo` backend uses [pyBBarolo](https://bbarolo.readthedocs.io/)
+pyuvkinematics's `bbarolo` backend uses [pyBBarolo](https://bbarolo.readthedocs.io/)
 `GalMod` to render cubes in the uv-plane likelihood. Optionally,
 `search.start: "bbarolo"` / `"fitmod3d"` runs FitMod3D on the dirty cube to
 seed a free-ring fit (see [`settings.md`](settings.md)); that is not the main
 fitter. It is not on PyPI as a pre-built wheel for every platform: you build
 BBarolo from source and install the Python wrapper into the same environment
-as pyuvkin.
+as pyuvkinematics.
 
 Upstream docs: https://bbarolo.readthedocs.io/en/latest/pybb_install.html
 
@@ -75,7 +75,7 @@ file BBarolo pyBBarolo/libBBarolo.dylib
 
 ## Install into the conda env
 
-Activate the same env you use for pyuvkin (`native_env`), then:
+Activate the same env you use for pyuvkinematics (`native_env`), then:
 
 ```bash
 conda activate native_env
@@ -123,7 +123,7 @@ CFITSIO string reads (`char comment[72]` vs `FLEN_COMMENT` 73,
 (often right after the `FREQ0-RESTFREQ` / `OBJECT` header warnings).
 
 Before building, widen those buffers to the CFITSIO `FLEN_*` constants (a
-patched tree already has this if you rebuilt with the pyuvkin install notes).
+patched tree already has this if you rebuilt with the pyuvkinematics install notes).
 In `header_read` and the other `comment[72]` sites:
 
 ```cpp
@@ -139,7 +139,7 @@ Cunit[i] = new char[FLEN_VALUE];
 Then `rm -rf src/Build && make && make lib && make pybb` and copy the new
 `libBBarolo.dylib*` into the env's `site-packages/pyBBarolo/`.
 
-pyuvkin also keeps GalMod templates under `/tmp/pkbb/` (short paths) and only
+pyuvkinematics also keeps GalMod templates under `/tmp/pkbb/` (short paths) and only
 passes options current pyBBarolo accepts (`ltype`; not the older
 `densflux` / `empty` / `outfolder` keywords).
 
@@ -177,4 +177,4 @@ defaults (`eps: 1`, `gtol: 2.5e-3 × n_rings`) and optional FitMod3D seeding.
 | `ImportError` / `AttributeError` on `libBBarolo.dylib` | dylib arch ≠ Python arch, or dylib not next to the installed package |
 | `np.int` / `np.bool` AttributeError | Apply the NumPy 2 shims above |
 | `Abort trap: 6` on `GalMod(...)` after header warnings | Undersized buffers in `header.cpp` — apply the FLEN_* patch above and rebuild |
-| `Option densflux/empty/outfolder unknown` | Current pyBBarolo dropped those GalMod options; pyuvkin only sets `ltype` |
+| `Option densflux/empty/outfolder unknown` | Current pyBBarolo dropped those GalMod options; pyuvkinematics only sets `ltype` |

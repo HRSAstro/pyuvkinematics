@@ -1,7 +1,7 @@
 # Settings file reference
 
-One JSON file describes a fit: `pyuvkin fit settings.json` or
-`pyuvkin.run("settings.json")`. `pyuvkin template settings.json` writes every
+One JSON file describes a fit: `pyuvkinematics fit settings.json` or
+`pyuvkinematics.run("settings.json")`. `pyuvkinematics template settings.json` writes every
 key at its default (`docs/fit-config-template.json`). Backend starters live under
 `examples/template_{bbarolo,galpak,kinms}.json`; `examples/ALMAQuest.json`
 is a filled-in starting point (swap `dataset` / `spectral` / `image_centre`
@@ -28,8 +28,8 @@ to the spectral reference.
 
 | key                   | default         | meaning                                                                                                                                                                                                                                                                       |
 | --------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dataset`             | required        | pyuvimage dataset: a directory with `data.fits` etc., or a `casa_export.py` `.npz`. Make one from a measurement set with `pyuvkin import obs.ms out --spw N` (needs python-casacore) or with `pyuvimage/casa_export.py` inside CASA. The data should be continuum-subtracted. |
-| `out`                 | `"pyuvkin_out"` | output directory (created; PyAutoFit's own files go under `out/autofit/`).                                                                                                                                                                                                    |
+| `dataset`             | required        | pyuvimage dataset: a directory with `data.fits` etc., or a `casa_export.py` `.npz`. Make one from a measurement set with `pyuvkinematics import obs.ms out --spw N` (needs python-casacore) or with `pyuvimage/casa_export.py` inside CASA. The data should be continuum-subtracted. |
+| `out`                 | `"pyuvkinematics_out"` | output directory (created; PyAutoFit's own files go under `out/autofit/`).                                                                                                                                                                                                    |
 | `spw`                 | `null`          | which spectral window holds the line when the dataset has several; single-window datasets need nothing.                                                                                                                                                                       |
 | `channels`            | `null`          | channel window as `[start, stop)` (stop exclusive), `{"start": a, "stop": b}`, or an explicit list of indices. `null` keeps all channels.                                                                                                                                     |
 | `velocity_window_kms` | `null`          | `[v_lo, v_hi]` km/s about the spectral reference; keeps the channels inside it. Give this **or** `channels`, not both. Channels the model predicts as zero are harmless but cost time, so window to the line plus some line-free margin.                                      |
@@ -65,7 +65,7 @@ of the full band (with a warning). The reference is fixed on the full band
 | `n_pixels`          | `null`   | fix the pixel count outright instead                                                                                                                                                                                                                                                                                                                       |
 | `render_oversample` | `1`      | render the model this many times finer again and block-sum onto the image grid; flux-conserving, and removes pixel-centre sampling error for discs with `scale_radius` of a pixel or two                                                                                                                                                                   |
 | `image_centre`      | `[0, 0]` | `[dRA, dDec]` arcsec of the grid centre from the phase centre. Set it to the source position: the fit needs the source inside `fov`, and a small centred field is far cheaper than a large one from the phase centre. The disc's `centre_ra`/`centre_dec` are then measured from this point. Check on the dirty image (`dirty_data.fits`) or a CASA image. |
-| `transformer`       | `"auto"` | how model cubes become visibilities: `dft` (exact, precomputed per-channel matrices; used by `auto` when they fit in `PYUVKIN_DFT_MAX_BYTES`, 1.5 GB by default), `pynufft`, or `nufft` (JAX). `auto` falls back to `pynufft` when the matrices are too large.                                                                                             |
+| `transformer`       | `"auto"` | how model cubes become visibilities: `dft` (exact, precomputed per-channel matrices; used by `auto` when they fit in `PYUVKINEMATICS_DFT_MAX_BYTES`, 1.5 GB by default), `pynufft`, or `nufft` (JAX). `auto` falls back to `pynufft` when the matrices are too large.                                                                                             |
 
 
 
@@ -215,14 +215,14 @@ or keyed `"inc=bezier pa=median"`.
 
 **FitMod3D seed** (optional, not a separate likelihood): with
 `rotation_curve: "rings"`, set `search.start` to `"bbarolo"` or
-`"fitmod3d"`. pyuvkin runs BBarolo's FitMod3D on the naturally weighted
+`"fitmod3d"`. pyuvkinematics runs BBarolo's FitMod3D on the naturally weighted
 dirty cube (image-plane residual), writes `out/bbarolo_seed/` (ring tables,
 seed cube), clips the result into your priors, and uses it as the first
 L-BFGS/BFGS start. Restarts still draw from `"prior"`. The seed and ring
 values are copied into `input_parameters.json` and
 `best_fit_parameters.json` under `bbarolo_seed`. This is for a fair
 comparison with BBarolo's ring finder while the uv-plane fit still uses
-pyuvkin's likelihood; it does not replace the sampler/optimiser.
+pyuvkinematics's likelihood; it does not replace the sampler/optimiser.
 
 ### `priors`
 
@@ -282,9 +282,9 @@ recorded in the outputs and compared with the fit.
 | key                | default      | meaning                                                                                                                                                                                                                                                                                                                  |
 | ------------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `method`           | `"nautilus"` | samplers `nautilus`, `dynesty`, `dynesty_dynamic`, `emcee` give posterior samples, errors and (nested samplers) the evidence; optimisers `lbfgs`, `bfgs` give the maximum-likelihood point only, with a trace of evaluations in `samples.csv`. Optimisers are 10-100x cheaper; use them to check the setup, then sample. |
-| `number_of_cores`  | `1`          | parallel likelihood evaluations for samplers only (optimisers ignore it). Env `PYUVKIN_CORES` overrides; may be an integer or `auto` (all CPUs minus one). Default 1 because NUFFT/JAX state does not fork cleanly.                                                                                                      |
+| `number_of_cores`  | `1`          | parallel likelihood evaluations for samplers only (optimisers ignore it). Env `PYUVKINEMATICS_CORES` overrides; may be an integer or `auto` (all CPUs minus one). Default 1 because NUFFT/JAX state does not fork cleanly.                                                                                                      |
 | `start`            | `"prior"`    | optimisers only: `prior` (random draw), `centre` (middle of every prior), `bbarolo` / `fitmod3d` (rings + BBarolo backend only: FitMod3D seed on the dirty cube), or a dict of starting values for some/all parameters                                                                                                 |
-| `restarts`         | `1`          | optimisers only: independent starts, keeping the best. For `bbarolo`/`kinms`, pyuvkin first scores `n_probe` prior draws (default `max(24, 8×restarts)`) and refines only the top `restarts`.                                                                                                                                 |
+| `restarts`         | `1`          | optimisers only: independent starts, keeping the best. For `bbarolo`/`kinms`, pyuvkinematics first scores `n_probe` prior draws (default `max(24, 8×restarts)`) and refines only the top `restarts`.                                                                                                                                 |
 | `n_probe`          | auto         | cloud backends + optimisers: number of prior draws to score before L-BFGS; `0` disables probing. Ignored when `start` is an explicit dict.                                                                                                                                                                                  |
 | `auto_correlation` | —            | emcee only: `{"check_size", "required_length", "change_threshold", "check_for_convergence"}`                                                                                                                                                                                                                             |
 | anything else      |              | passed to the PyAutoFit search class: `n_live` (nautilus, default 200), `nlive` (dynesty, 100), `nwalkers`/`nsteps` (emcee, 40/1000), `maxiter`, `eps` (finite-difference step for lbfgs/bfgs; default `1e-6`, or `1` with `gtol: 1e-3` for `bbarolo`/`kinms`, and `gtol: 2.5e-3 × n_rings` when `rotation_curve` is `rings`), `gtol`, ...                       |
@@ -311,24 +311,24 @@ summary, geometry, priors), `best_fit_parameters.json` (maximum likelihood,
 and for samplers median/1-sigma/3-sigma, evidence; chi^2 per channel;
 comparison with `truth`; optional `twostage`, `bbarolo_seed`, `morphology`),
 `samples.csv` (one row per sample or evaluation: parameters, log likelihood,
-log prior, weight), and `pyuvkin.log` (appended each run: INFO lines including
+log prior, weight), and `pyuvkinematics.log` (appended each run: INFO lines including
 process RSS and host available memory at major milestones). TWOSTAGE ring fits
 also write `samples_stage1.csv`. Freeform SB reconstruction goes under
 `surface_brightness/`; a FitMod3D seed run adds `bbarolo_seed/`.
 
 ### Logging
 
-The CLI prints INFO to stderr; each fit also appends to `out/pyuvkin.log`
+The CLI prints INFO to stderr; each fit also appends to `out/pyuvkinematics.log`
 (with timestamps). At start, after model setup, each search stage, and at
-the end, pyuvkin logs process RSS and host available/total memory (no extra
+the end, pyuvkinematics logs process RSS and host available/total memory (no extra
 dependencies). Use `-v` / `--verbose` for DEBUG on stderr.
 
 Environment variables that affect a run without editing the JSON:
 
 | variable | default | effect |
 | --- | --- | --- |
-| `PYUVKIN_DFT_MAX_BYTES` | `1.5e9` | `transformer: auto` uses exact DFT matrices when all channels fit below this size |
-| `PYUVKIN_CORES` | — | overrides `search.number_of_cores` for samplers (`auto` = CPUs − 1) |
+| `PYUVKINEMATICS_DFT_MAX_BYTES` | `1.5e9` | `transformer: auto` uses exact DFT matrices when all channels fit below this size |
+| `PYUVKINEMATICS_CORES` | — | overrides `search.number_of_cores` for samplers (`auto` = CPUs − 1) |
 
 ## Checklist for a new dataset
 

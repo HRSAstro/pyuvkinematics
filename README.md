@@ -1,4 +1,4 @@
-# pyuvkin
+# pyuvkinematics
 
 Kinematic modelling of interferometric spectral-line data by forward
 modelling in the uv-plane.
@@ -8,7 +8,7 @@ Fourier transformed channel by channel to the observed uv points, and
 compared with the calibrated visibilities. Nothing is ever CLEANed or
 re-convolved; dirty images appear only as diagnostics. Data handling is
 [pyuvimage](../pyuvimage)'s — the same dataset directories, noise model and
-uv conventions — so a pyuvkin cube and a pyuvimage image of the same data sit
+uv conventions — so a pyuvkinematics cube and a pyuvimage image of the same data sit
 on the same sky. 
 
 Note - these installation instructions assume a working version of pyuvimage is installed. See pyuvimage documentation for more information.
@@ -28,27 +28,27 @@ build (not a simple pip install on Apple Silicon). See
 ## Use
 
 ```bash
-pyuvkin template settings.json     # every setting at its default
-pyuvkin import obs.ms data/ --spw 3          # pyuvimage's importer
-pyuvkin fit settings.json [--method lbfgs] [--backend kinms]
-pyuvkin demo out/ --method lbfgs             # mock + analytic and freeform fits
-pyuvkin mock-spiral out/                     # mocks with structured morphology
+pyuvkinematics template settings.json     # every setting at its default
+pyuvkinematics import obs.ms data/ --spw 3          # pyuvimage's importer
+pyuvkinematics fit settings.json [--method lbfgs] [--backend kinms]
+pyuvkinematics demo out/ --method lbfgs             # mock + analytic and freeform fits
+pyuvkinematics mock-spiral out/                     # mocks with structured morphology
 ```
 
-The CLI is the `pyuvkin` console script (`pip install -e .`); there is no
-`python -m pyuvkin` entry point. `pyuvkin demo` writes one mock under
+The CLI is the `pyuvkinematics` console script (`pip install -e .`); there is no
+`python -m pyuvkinematics` entry point. `pyuvkinematics demo` writes one mock under
 `out/mock/`, then fits it twice: `out/fit_analytic/` (exponential disc) and
 `out/fit_freeform/` (pyuvimage adaptive moment map). Cloud backends seed both
 from a quick thindisk L-BFGS under `out/fit_thindisk_seed/`.
-`pyuvkin mock-spiral` builds structured (spiral-arm) mocks for testing
+`pyuvkinematics mock-spiral` builds structured (spiral-arm) mocks for testing
 analytic vs freeform surface brightness — see
 `[docs/spiral-mocks.md](docs/spiral-mocks.md)`.
 
 or in Python
 
 ```python
-import pyuvkin
-result = pyuvkin.run("settings.json")
+import pyuvkinematics
+result = pyuvkinematics.run("settings.json")
 result.best_fit_record["median_pdf"]
 ```
 
@@ -150,7 +150,7 @@ band before any channel selection, so `velocity_window_kms` and `v_sys`
 share one zero point. `spectral.frame` (e.g. `LSRK`, `TOPOCENT`) names the
 frame of the data's frequencies for the FITS `SPECSYS`; pyuvimage exports do
 not record it, so it is omitted unless given. `RESTFRQ` is written only when
-a rest frequency was given; pyuvkin's zero point goes in `VREFFRQ`.
+a rest frequency was given; pyuvkinematics's zero point goes in `VREFFRQ`.
 
 ### Backends (`model.backend`)
 
@@ -204,7 +204,7 @@ Optimisers take `start` (`"prior"`, `"centre"`, `"bbarolo"` / `"fitmod3d"` for
 BBarolo free rings, or a dict of values) and `restarts`. Free-ring L-BFGS
 defaults to `eps: 1` and `gtol: 2.5e-3 × n_rings` unless overridden. Other
 keys pass through to the PyAutoFit search (`n_live`, `nlive`, `nwalkers`/`nsteps`,
-`maxiter`, `eps`, ...); `number_of_cores` or `PYUVKIN_CORES` (integer or
+`maxiter`, `eps`, ...); `number_of_cores` or `PYUVKINEMATICS_CORES` (integer or
 `auto`) parallelise a sampler only.
 
 ## Outputs
@@ -224,7 +224,7 @@ keys pass through to the PyAutoFit search (`n_live`, `nlive`, `nwalkers`/`nsteps
 | `samples_stage1.csv`                                                              | TWOSTAGE ring fits: stage-1 optimiser trace                                                                                      |
 | `surface_brightness/`                                                             | freeform map reconstruction (pyuvimage products)                                                                                 |
 | `bbarolo_seed/`                                                                   | FitMod3D seed run (`search.start: bbarolo`)                                                                                      |
-| `pyuvkin.log`                                                                     | appended run log (includes memory: process RSS and host RAM available)                                                           |
+| `pyuvkinematics.log`                                                                     | appended run log (includes memory: process RSS and host RAM available)                                                           |
 | `autofit/`                                                                        | PyAutoFit's own output tree for the search                                                                                       |
 
 
@@ -235,7 +235,7 @@ keys pass through to the PyAutoFit search (`n_live`, `nlive`, `nwalkers`/`nsteps
 The image grid follows pyuvimage's rules (`pixel_scale` auto, `oversample`,
 `n_pixels`); `render_oversample` renders the model finer and block-sums.
 The exact DFT is stored as one matrix per channel when all of them fit in
-`PYUVKIN_DFT_MAX_BYTES` (1.5 GB default) — a few ms per evaluation; larger
+`PYUVKINEMATICS_DFT_MAX_BYTES` (1.5 GB default) — a few ms per evaluation; larger
 problems fall back to pynufft or the JAX NUFFT. A ten-parameter Nautilus fit
 to a small mock takes ~3 minutes; L-BFGS about a minute.
 

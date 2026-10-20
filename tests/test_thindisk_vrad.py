@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from pyuvkin.models import AnalyticSB, DiscParameters, make_renderer
+from pyuvkinematics.models import AnalyticSB, DiscParameters, make_renderer
 
 
 def test_vrad_zero_matches_circular_los(geometry, spectral, disc):
@@ -14,7 +14,7 @@ def test_vrad_zero_matches_circular_los(geometry, spectral, disc):
 
 def test_vrad_changes_the_cube_and_near_side_sign(geometry, spectral, disc):
     """Inflow (vrad < 0) redshifts the near side (theta = -90 deg)."""
-    from pyuvkin import conventions
+    from pyuvkinematics import conventions
 
     r = make_renderer("thindisk", geometry, spectral, AnalyticSB(), {})
     base = r.cube(disc)

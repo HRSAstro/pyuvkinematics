@@ -3,7 +3,7 @@
     "KinMS backend template (Monte Carlo cloudlets; supports freeform SB and finite thickness).",
     "Install: pip install 'kinms>=3.0.14'. Likelihood is noisy — prefer a sampler, not lbfgs/bfgs.",
     "JSON does not allow // comments — use _keys for notes.",
-    "Copy this file, set dataset/out/spectral/priors, then: pyuvkin fit template_kinms.json"
+    "Copy this file, set dataset/out/spectral/priors, then: pyuvkinematics fit template_kinms.json"
   ],
 
   "dataset": "path/to/visibilities.npz",

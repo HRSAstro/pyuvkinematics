@@ -5,11 +5,11 @@ import pytest
 
 import autogalaxy as ag
 
-from pyuvkin import mock, uvdata
-from pyuvkin.grids import resolve_cube_geometry
-from pyuvkin.models import AnalyticSB, DiscParameters, PARAMETER_NAMES, make_renderer
-from pyuvkin.spectral import C_KM_S, spectral_axis
-from pyuvkin.transform import CubeTransformer
+from pyuvkinematics import mock, uvdata
+from pyuvkinematics.grids import resolve_cube_geometry
+from pyuvkinematics.models import AnalyticSB, DiscParameters, PARAMETER_NAMES, make_renderer
+from pyuvkinematics.spectral import C_KM_S, spectral_axis
+from pyuvkinematics.transform import CubeTransformer
 
 
 def test_spectral_axis_radio_velocities_and_order():
@@ -95,7 +95,7 @@ def test_flagged_rows_are_dropped():
 def test_collapse_channels_pools_re_im_noise():
     """Freeform's MFS step needs sigma_re == sigma_im on every visibility
     (autoarray's sparse operator refuses any mismatch)."""
-    from pyuvkin.freeform import collapse_channels
+    from pyuvkinematics.freeform import collapse_channels
 
     uvd, _ = mock.simulate_disc(n_vis=50, n_chan=4, sigma_jy=1e-3, seed=2)
     # deliberately unequal re/im, including a minority of large mismatches
@@ -121,7 +121,7 @@ def test_freeform_uncertainty_mode_helpers():
     maps must use model_bayesian so the errors match the sky."""
     from types import SimpleNamespace
 
-    from pyuvkin.freeform import _freeform_model_image, _uncertainty_mode
+    from pyuvkinematics.freeform import _freeform_model_image, _uncertainty_mode
 
     assert _uncertainty_mode({"uncertainty": {"mode": "bayesian", "terms": {}}}) == "bayesian"
     assert _uncertainty_mode({"uncertainty_map": True}) == "statistical"
@@ -145,8 +145,8 @@ def test_freeform_defaults_uncertainty_statistical(monkeypatch, tmp_path):
     statistical so the S/N mask and morphology_samples have a map."""
     from types import SimpleNamespace
 
-    from pyuvkin import freeform
-    from pyuvkin.spectral import spectral_axis
+    from pyuvkinematics import freeform
+    from pyuvkinematics.spectral import spectral_axis
 
     captured = {}
 
